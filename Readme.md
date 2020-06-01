@@ -7,5 +7,5 @@
 tecplot reader was originated from https://github.com/dpettas/ReadBinaryTecplotFiles.
 ## Notes
 * In plt file format, data is serialized and stored in **Fortran** style.
-* When dealing with cell-centered location data, the **TWO fast moving indices** are aligned by adding ghost cell,
-This is ambiguous or misleading in <<tecplot data format guide>>.
+* When dealing with cell-centered location data, the **TWO fast moving indices (the first two indices in Fortran)** are aligned by adding one extra ghost cell of zero value,
+which is ambiguous or misleading in Page 188 of \<\<tecplot data format guide>>.
