@@ -144,7 +144,7 @@ class Zone(object):
             print("type of data not supported: {}".format(vfmt))
             sys.exit(1)
         if self.variablesLocation[varIdx] == 0:
-            np_array = np.array(data).reshape(out_shape, order='F')  # plt data are serilized and stored in Fortran style
+            np_array = np.array(data).reshape(out_shape, order='F')
         else:
             np_array = np.array(data).reshape(out_shape, order='F')
             # np_array = np_array[:, :, :-1]
@@ -355,14 +355,29 @@ class TecplotBinaryReader():
 
 
 class TecplotBinaryWriter():
-    def __init__(self, filename, varsName, varsLoc, vars, dataFormat='f'):
+    '''tecplot file writer.
+    initialization parameters:
+        filename :  string, save path and file name
+        vars     :  list of numpy nd-array 
+        varsName :  list of string, names of every variable, if default, set to V1, V2...
+        varsLoc  :  list of [0|1], data location, 0: vertex; 1: cell-centered, default is 0
+        dataFormat : 'f' or 'd', denotes float or double
+    '''
+    def __init__(self, filename, vars,  varsName=None, varsLoc=None, dataFormat='f'):
         self.filename = filename
         self.pltFile = PltFile(filename, mode='wb')
+        nVars = len(vars)
+        if varsName is None:
+            varsName = []
+            for i in range(nVars):
+                varsName.append('V{:d}'.format(i+1))
+        if varsLoc is None:
+            varsLoc = [0]*nVars
+
         self.pltFile.write_raw('#!TDV112'.encode('utf-8'))
         self.pltFile.write_integer(1)  # byte_order
         self.pltFile.write_integer(0)  # file type
         self.pltFile.write_string('Simple Dataset')
-        nVars = len(varsName)
         self.pltFile.write_integer(nVars)
         for varName in varsName:
             self.pltFile.write_string(varName)
@@ -406,7 +421,7 @@ class TecplotBinaryWriter():
                     (var.shape[0], 1, var.shape[2])), axis=1)
             if dataFormat == 'd':
                 self.pltFile.write_double_list(
-                    var.reshape(-1, order='F').tolist())  # plt data are serilized and stored in Fortran style
+                    var.reshape(-1, order='F').tolist())
             else:
                 self.pltFile.write_float_list(
                     var.reshape(-1, order='F').tolist())

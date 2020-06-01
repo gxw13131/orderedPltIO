@@ -22,9 +22,7 @@ if __name__ == "__main__":
         for j in range(jmax-1):
             for k in range(kmax-1):
                 T[i, j, k] = (i+1)*(j+1)*(k+1)
-    TecplotBinaryWriter('test.plt', name_list,
-                        loc_list, [xx, yy, zz, T])
-    # test reading
+    TecplotBinaryWriter('test.plt', [xx, yy, zz, T], varsLoc=loc_list)
     plt = TecplotBinaryReader("test.plt", info=True)
     print(plt.get_name_list())
     print(plt.get_location_list())
