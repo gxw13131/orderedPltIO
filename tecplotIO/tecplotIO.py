@@ -148,7 +148,7 @@ class Zone(object):
         else:
             np_array = np.array(data).reshape(out_shape, order='F')
             # np_array = np_array[:, :, :-1]
-            np_array = np_array[:-1, :-1, :]
+            np_array = np_array[0:self.iCell, 0:self.jCell, :]
         return np_array
 
     def read_minmax_of_values(self, pltFile):
@@ -196,6 +196,7 @@ class Zone(object):
         line += commit
 
         return line
+
 
 class TecplotBinaryReader():
     def __init__(self, filename, info=False):
@@ -363,6 +364,7 @@ class TecplotBinaryWriter():
         varsLoc  :  list of [0|1], data location, 0: vertex; 1: cell-centered, default is 0
         dataFormat : 'f' or 'd', denotes float or double
     '''
+
     def __init__(self, filename, vars,  varsName=None, varsLoc=None, dataFormat='f'):
         self.filename = filename
         self.pltFile = PltFile(filename, mode='wb')
@@ -373,6 +375,14 @@ class TecplotBinaryWriter():
                 varsName.append('V{:d}'.format(i+1))
         if varsLoc is None:
             varsLoc = [0]*nVars
+
+        for i, loc in enumerate(varsLoc):
+            if loc == 0:
+                self.imax, self.jmax, self.kmax = vars[i].shape
+                self.iCell = max(self.imax-1, 1)
+                self.jCell = max(self.jmax-1, 1)
+                self.kCell = max(self.kmax-1, 1)
+                break
 
         self.pltFile.write_raw('#!TDV112'.encode('utf-8'))
         self.pltFile.write_integer(1)  # byte_order
@@ -394,7 +404,7 @@ class TecplotBinaryWriter():
         self.pltFile.write_integer(0)  # face neighbor
         self.pltFile.write_integer(0)  # user-defined face neighbor
         # shape
-        self.pltFile.write_integer_list(vars[0].shape)
+        self.pltFile.write_integer_list([self.imax, self.jmax, self.kmax])
         # auxiliary name/value
         self.pltFile.write_integer(0)  # auxiliary name/value flag
         # end of head section
@@ -415,10 +425,12 @@ class TecplotBinaryWriter():
             if loc == 0:
                 pass
             else:
-                var = np.append(var, np.zeros(
-                    (1, var.shape[1], var.shape[2])), axis=0)
-                var = np.append(var, np.zeros(
-                    (var.shape[0], 1, var.shape[2])), axis=1)
+                if self.imax > self.iCell:
+                    var = np.append(var, np.zeros(
+                        (1, var.shape[1], var.shape[2])), axis=0)
+                if self.jmax > self.jCell:
+                    var = np.append(var, np.zeros(
+                        (var.shape[0], 1, var.shape[2])), axis=1)
             if dataFormat == 'd':
                 self.pltFile.write_double_list(
                     var.reshape(-1, order='F').tolist())
