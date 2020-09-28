@@ -1,0 +1,9 @@
+setup.py
+tecplotIO/__init__.py
+tecplotIO/pltFile.py
+tecplotIO/tecplotIO.py
+tecplotIO.egg-info/PKG-INFO
+tecplotIO.egg-info/SOURCES.txt
+tecplotIO.egg-info/dependency_links.txt
+tecplotIO.egg-info/not-zip-safe
+tecplotIO.egg-info/top_level.txt

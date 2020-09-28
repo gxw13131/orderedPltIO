@@ -1,5 +1,5 @@
 import numpy as np
-from tecplotIO.tecplotIO import TecplotBinaryReader, TecplotBinaryWriter
+from tecplotIO import TecplotBinaryReader, TecplotBinaryWriter
 
 if __name__ == "__main__":
     # test write from user defined
