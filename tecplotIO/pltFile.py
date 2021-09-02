@@ -115,8 +115,8 @@ class PltFile(object):
         """
             This function reads num doubles continuously.
         """
-        buffer = self._read_line(4*num)
-        float_list = struct.unpack('={:d}d'.format(num), buffer)
+        buffer = self._read_line(8*num)
+        double_list = struct.unpack('={:d}d'.format(num), buffer)
         return double_list
 
     def write_double_list(self, doubleList):

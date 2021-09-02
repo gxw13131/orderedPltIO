@@ -399,6 +399,7 @@ class TecplotBinaryWriter():
     def __init__(self, filename, vars,  varsName=None, varsLoc=None, dataFormat='f'):
         self.filename = filename
         self.pltFile = PltFile(filename, mode='wb')
+        self.ndim = 0
         nVars = len(vars)
         if varsName is None:
             varsName = []
@@ -407,12 +408,30 @@ class TecplotBinaryWriter():
         if varsLoc is None:
             varsLoc = [0]*nVars
 
+        for i, var in enumerate(vars):
+            self.ndim = max(np.squeeze(var).ndim, self.ndim)
+            if var.ndim == 1:
+                vars[i] = np.expand_dims(var, axis=(0, 1))
+            elif var.ndim == 2:
+                vars[i] = np.expand_dims(var, axis=0)
+            elif var.ndim == 3:
+                pass
+            else:
+                # 4d array is not supported
+                pass
+
         for i, loc in enumerate(varsLoc):
             if loc == 0:
                 self.imax, self.jmax, self.kmax = vars[i].shape
                 self.iCell = max(self.imax-1, 1)
                 self.jCell = max(self.jmax-1, 1)
                 self.kCell = max(self.kmax-1, 1)
+                break
+            if loc == 1:
+                self.iCell, self.jCell, self.kCell = vars[i].shape
+                self.imax = self.iCell+1 if self.iCell > 1 else 1
+                self.jmax = self.jCell+1 if self.iCell > 1 else 1
+                self.kmax = self.kCell+1 if self.iCell > 1 else 1
                 break
 
         self.pltFile.write_raw('#!TDV112'.encode('utf-8'))
@@ -459,7 +478,8 @@ class TecplotBinaryWriter():
                 if self.imax > self.iCell:
                     var = np.append(var, np.zeros(
                         (1, var.shape[1], var.shape[2])), axis=0)
-                if self.jmax > self.jCell:
+                # REVIEW: for 1/2-d array, the writting rule seems to be different.
+                if (self.ndim > 1 and self.jmax > self.jCell):
                     var = np.append(var, np.zeros(
                         (var.shape[0], 1, var.shape[2])), axis=1)
             if dataFormat == 'd':

@@ -419,7 +419,6 @@ class TecplotBinaryWriter():
             else:
                 # 4d array is not supported
                 pass
-        print(self.ndim)
 
         for i, loc in enumerate(varsLoc):
             if loc == 0:
@@ -472,13 +471,10 @@ class TecplotBinaryWriter():
             self.pltFile.write_double(var.min())
             self.pltFile.write_double(var.max())
         # write data of variables
-        print(self.imax, self.jmax, self.kmax)
-        print(self.iCell, self.jCell, self.kCell)
         for loc, var in zip(varsLoc, vars):
             if loc == 0:
                 pass
             else:
-                print(var.shape)
                 if self.imax > self.iCell:
                     var = np.append(var, np.zeros(
                         (1, var.shape[1], var.shape[2])), axis=0)
